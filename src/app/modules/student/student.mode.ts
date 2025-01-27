@@ -5,7 +5,7 @@ import {
   LocalGuardian,
   Student,
   UserName,
-} from "./student/student.interface";
+} from "./student.interface";
 
 const localGuardianSchema = new Schema<LocalGuardian>({
   name: {
@@ -33,14 +33,14 @@ const userNameSchema = new Schema<UserName>({
     trim: true,
     maxlength: [20, "Fist name cannot be more than 20 char"],
     // custom made validator
-    validate: {
-      validator: function (value: string) {
-        const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
+    // validate: {
+    //   validator: function (value: string) {
+    //     const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
 
-        return value === firstNameStr;
-      },
-      message: "{VALUE} is not in capitalized format",
-    },
+    //     return value === firstNameStr;
+    //   },
+    //   message: "{VALUE} is not in capitalized format",
+    // },
   },
   middleName: { type: String, trim: true },
   lastName: {
