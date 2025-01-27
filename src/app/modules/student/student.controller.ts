@@ -7,7 +7,7 @@ const createStudent = async (req: Request, res: Response) => {
 
     const result = await StudentService.createStudentIntoDB(studentData);
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "Student created successfully",
       data: result,
@@ -24,6 +24,7 @@ const createStudent = async (req: Request, res: Response) => {
 const getAllStudent = async (req: Request, res: Response) => {
   try {
     const result = await StudentService.getAllStudentFromDB();
+    if (res.headersSent) return;
     res.status(200).json({
       success: true,
       message: "Students are retrieved successfully",
