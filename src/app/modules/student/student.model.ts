@@ -1,13 +1,14 @@
 import { Schema, model } from "mongoose";
 // import validator from "validator";
 import {
+  StudentModel,
   TGuardian,
   TLocalGuardian,
   TStudent,
-  StudentMethods,
-  StudentModel,
   TUserName,
 } from "./student.interface";
+import bcrypt from "bcrypt";
+import config from "../../config";
 
 const localGuardianSchema = new Schema<TLocalGuardian>({
   name: {
@@ -56,11 +57,17 @@ const userNameSchema = new Schema<TUserName>({
   },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
+const studentSchema = new Schema<TStudent, StudentModel>({
   id: {
     type: String,
     required: [true, "Student ID is required"],
     unique: true,
+  },
+  password: {
+    type: String,
+    required: [true, "Password is required"],
+    unique: true,
+    maxlength: [20, "Password cannot be more than 20 char"],
   },
   name: {
     type: userNameSchema,
@@ -116,10 +123,35 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
   },
 });
 
-studentSchema.methods.isUserExist = async function (id: string) {
-  const existingUser = await Student.findOne({ id });
+// pre save middleware / hook --> will work on create() or save()
+studentSchema.pre("save", async function (next) {
+  // console.log(this, "pre hook: this will save the data");
+  // hashing password and save into db
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_round)
+  );
+  next();
+});
 
+// post save middleware / hook
+studentSchema.post("save", function () {
+  console.log(this, "post hook: saved our data");
+});
+
+// create a custom static method
+studentSchema.statics.isUserExists = async function (id: string) {
+  const existingUser = await Student.findOne({ id });
   return existingUser;
 };
+
+// create a custom instance method
+// studentSchema.methods.isUserExist = async function (id: string) {
+//   const existingUser = await Student.findOne({ id });
+
+//   return existingUser;
+// };
 
 export const Student = model<TStudent, StudentModel>("Student", studentSchema);
